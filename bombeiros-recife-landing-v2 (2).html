@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Corpo de Bombeiros de Recife — Por Ellen Lago</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0c0e10;
+    --ink-2:#16191d;
+    --paper:#eeece6;
+    --paper-dim:#c9c6bd;
+    --alarm:#c1272d;
+    --alarm-dim:#7a1a1e;
+    --amber:#e8a33d;
+    --steel:#5b6773;
+    --steel-light:#8a95a1;
+    --line:rgba(238,236,230,0.14);
+    --line-strong:rgba(238,236,230,0.28);
+    --display:'Big Shoulders Display', sans-serif;
+    --body:'IBM Plex Sans', sans-serif;
+    --mono:'IBM Plex Mono', monospace;
+    --wrap:1180px;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+
+  body{
+    margin:0;
+    background:var(--ink);
+    color:var(--paper);
+    font-family:var(--body);
+    font-size:16px;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    position:relative;
+  }
+
+  /* living background — animated mesh, ember-toned, not a rainbow */
+  body::before{
+    content:"";
+    position:fixed; inset:0; z-index:-1; pointer-events:none;
+    background:
+      radial-gradient(ellipse 900px 700px at 50% 115%, rgba(193,39,45,0.16), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 85% -10%, rgba(232,163,61,0.08), transparent 55%),
+      radial-gradient(ellipse 640px 520px at 8% 18%, rgba(193,39,45,0.09), transparent 58%),
+      radial-gradient(ellipse 560px 460px at 92% 78%, rgba(91,103,115,0.10), transparent 55%);
+    background-size:150% 150%, 150% 150%, 160% 160%, 160% 160%;
+    animation:emberDrift 26s ease-in-out infinite;
+    filter:blur(10px);
+  }
+  @keyframes emberDrift{
+    0%,100%{background-position:0% 0%, 100% 0%, 0% 100%, 100% 100%;}
+    50%{background-position:10% 6%, 90% 8%, 8% 92%, 88% 88%;}
+  }
+
+  /* global cursor spotlight — subtle, follows pointer across the whole page */
+  .spotlight{
+    position:fixed; inset:0; z-index:1; pointer-events:none;
+    opacity:0; transition:opacity .4s ease;
+    background:radial-gradient(560px circle at var(--sx,50%) var(--sy,50%), rgba(193,39,45,0.06), transparent 70%);
+  }
+  .spotlight.active{opacity:1;}
+
+  /* film grain, very low opacity, sits above everything */
+  body::after{
+    content:"";
+    position:fixed; inset:0; z-index:200; pointer-events:none;
+    opacity:0.035; mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+
+  /* drifting light particles — subtle, decorative, low count */
+  .particles{position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden;}
+  .particle{
+    position:absolute; bottom:-10%; border-radius:50%;
+    background:radial-gradient(circle, rgba(232,163,61,0.55), rgba(232,163,61,0) 70%);
+    filter:blur(1px);
+    animation:particleRise linear infinite;
+  }
+  @keyframes particleRise{
+    0%{transform:translateY(0) translateX(0); opacity:0;}
+    8%{opacity:0.55;}
+    92%{opacity:0.35;}
+    100%{transform:translateY(-115vh) translateX(var(--drift,20px)); opacity:0;}
+  }
+
+  a{color:inherit;}
+  .wrap{max-width:var(--wrap); margin:0 auto; padding:0 28px;}
+  h1,h2,h3{font-family:var(--display); font-weight:700; margin:0;}
+  :focus-visible{outline:2px solid var(--amber); outline-offset:3px;}
+  button, .btn{font-family:var(--body); cursor:pointer;}
+
+  body.reduced-motion *{
+    animation-duration:0.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:0.01ms !important;
+    scroll-behavior:auto !important;
+  }
+
+  /* ---------- PROGRESS BAR ---------- */
+  .scroll-progress{
+    position:fixed; top:0; left:0; height:3px; width:100%;
+    background:var(--alarm); transform-origin:left; transform:scaleX(0); z-index:210;
+  }
+
+  /* ---------- TICKER ---------- */
+  .ticker{
+    background:rgba(22,25,29,0.8); border-bottom:1px solid var(--line);
+    overflow:hidden; font-family:var(--mono); font-size:12.5px; color:var(--paper-dim);
+    white-space:nowrap; position:relative; z-index:60;
+  }
+  .ticker-track{display:inline-flex; gap:56px; padding:9px 0; animation:scroll-left 34s linear infinite; padding-left:100%;}
+  .ticker-track span{display:inline-flex; align-items:center; gap:8px;}
+  .ticker-track span::before{content:"—"; color:var(--amber);}
+  @keyframes scroll-left{ from{transform:translateX(0);} to{transform:translateX(-100%);} }
+
+  /* ---------- HEADER (refined glass) ---------- */
+  header{
+    position:sticky; top:0; z-index:80;
+    background:rgba(255,255,255,0.03);
+    backdrop-filter:blur(30px) saturate(180%);
+    -webkit-backdrop-filter:blur(30px) saturate(180%);
+    border-bottom:1px solid rgba(255,255,255,0.08);
+    box-shadow:0 10px 40px rgba(0,0,0,0.30);
+    transition:padding .25s ease, box-shadow .25s ease;
+  }
+  header.compact{box-shadow:0 14px 44px rgba(0,0,0,0.4);}
+  header.compact .nav-row{padding-top:9px; padding-bottom:9px;}
+  .nav-row{display:flex; align-items:center; justify-content:space-between; padding:16px 28px; max-width:var(--wrap); margin:0 auto; transition:padding .25s ease;}
+  .brand{display:flex; align-items:center; gap:12px; text-decoration:none;}
+  .brand-badge{width:40px; height:40px; border-radius:4px; border:1.5px solid var(--paper); display:flex; align-items:center; justify-content:center; font-family:var(--display); font-weight:800; font-size:15px; color:var(--paper); flex-shrink:0;}
+  .brand-text{display:flex; flex-direction:column; line-height:1.15;}
+  .brand-text strong{font-family:var(--display); font-weight:700; font-size:18px;}
+  .brand-text small{font-family:var(--mono); font-size:10.5px; color:var(--paper-dim); letter-spacing:0.4px;}
+  nav.main-links{display:flex; gap:30px;}
+  nav.main-links a{font-size:14.5px; text-decoration:none; color:var(--paper-dim); border-bottom:1px solid transparent; padding-bottom:2px; transition:color .15s ease, border-color .15s ease;}
+  nav.main-links a:hover{color:var(--paper); border-color:var(--line-strong);}
+  .header-right{display:flex; align-items:center; gap:14px;}
+  .call-btn{display:flex; align-items:center; gap:9px; background:var(--alarm); color:var(--paper); padding:9px 16px; border-radius:3px; text-decoration:none; font-weight:600; font-size:14.5px; border:1px solid var(--alarm); transition:background .15s ease, transform .15s ease;}
+  .call-btn:hover{background:#a91f24; transform:translateY(-1px);}
+  .call-btn .num{font-family:var(--mono); font-size:15px;}
+  .call-dot{width:7px; height:7px; border-radius:50%; background:var(--paper); animation:pulse 1.6s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:1;} 50%{opacity:.35;}}
+  .menu-toggle{display:none; background:none; border:1px solid var(--line-strong); color:var(--paper); padding:8px 11px; border-radius:3px;}
+  @media (max-width:880px){ nav.main-links{display:none;} .menu-toggle{display:block;} }
+
+  /* ---------- SCROLLYTELLING HERO ---------- */
+  .hero-scrolly{position:relative; height:280vh;}
+  .stage{
+    position:sticky; top:0; height:100vh; overflow:hidden;
+    display:flex; align-items:center; border-bottom:1px solid var(--line);
+    background:var(--ink); isolation:isolate;
+  }
+  .aurora{
+    position:absolute; inset:0; z-index:0; pointer-events:none;
+    background:
+      radial-gradient(circle at 28% 65%, rgba(193,39,45,0.34), transparent 42%),
+      radial-gradient(circle at 68% 55%, rgba(232,163,61,0.16), transparent 46%),
+      radial-gradient(circle at 45% 20%, rgba(238,236,230,0.06), transparent 50%);
+    filter:blur(90px);
+    animation:auroraMove 13s ease-in-out infinite alternate;
+  }
+  @keyframes auroraMove{ from{transform:translate(-30px,-10px) scale(1);} to{transform:translate(30px,14px) scale(1.15);} }
+
+  /* floating glass cards around the hero scene */
+  .floating-card{
+    position:absolute; z-index:5;
+    background:rgba(255,255,255,0.04);
+    backdrop-filter:blur(20px) saturate(160%);
+    -webkit-backdrop-filter:blur(20px) saturate(160%);
+    border:1px solid rgba(255,255,255,0.08);
+    border-radius:16px;
+    padding:12px 16px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.4);
+    display:flex; flex-direction:column; gap:2px;
+    opacity:0;
+    animation:floatCard 6s ease-in-out infinite;
+    will-change:transform;
+  }
+  .floating-card .fc-label{font-family:var(--mono); font-size:9.5px; color:var(--steel-light); letter-spacing:0.5px;}
+  .floating-card .fc-value{font-family:var(--display); font-size:20px; color:var(--paper); font-weight:700;}
+  .floating-card--response{top:14%; left:-9%; animation-delay:.2s;}
+  .floating-card--fleet{bottom:12%; left:-3%; animation-delay:1.1s;}
+  .floating-card--ops{top:44%; right:-11%; animation-delay:.6s;}
+  @keyframes floatCard{ 0%,100%{transform:translateY(0);} 50%{transform:translateY(-14px);} }
+  @media (max-width:900px){ .floating-card{display:none;} }
+  .stage::after{
+    content:""; position:absolute; inset:0; pointer-events:none; z-index:2; opacity:0;
+    transition:opacity .3s ease;
+    background:radial-gradient(320px circle at var(--mx,50%) var(--my,50%), rgba(193,39,45,0.20), transparent 70%);
+  }
+  .stage.has-pointer:hover::after{opacity:1;}
+
+  .stage-grid{width:100%; max-width:var(--wrap); margin:0 auto; padding:0 28px; display:grid; grid-template-columns:1.05fr 0.95fr; gap:40px; align-items:center; position:relative; z-index:3;}
+  .hero-tag{font-family:var(--mono); font-size:12.5px; color:var(--amber); margin-bottom:20px; display:block;}
+  .stage-copy h1{font-size:clamp(48px,7vw,96px); line-height:0.96; font-weight:700; letter-spacing:-0.01em;}
+  .reveal-word{overflow:hidden; display:block;}
+  .reveal-word span{display:inline-block; transform:translateY(115%); opacity:0; animation:wordUp .8s cubic-bezier(.16,1,.3,1) forwards; animation-delay:var(--d,0s);}
+  @keyframes wordUp{ to{transform:translateY(0); opacity:1;} }
+  .stage-copy p.lede{font-size:18px; color:var(--paper-dim); max-width:46ch; margin-top:24px;}
+  .hero-ctas{display:flex; gap:14px; margin-top:34px; flex-wrap:wrap;}
+  .btn-primary{background:var(--alarm); color:var(--paper); border:1px solid var(--alarm); padding:14px 22px; border-radius:3px; text-decoration:none; font-weight:600; font-size:15px; transition:background .15s ease, transform .15s ease;}
+  .btn-primary:hover{background:#a91f24; transform:translateY(-1px);}
+  .btn-secondary{background:transparent; color:var(--paper); border:1px solid var(--line-strong); padding:14px 22px; border-radius:3px; text-decoration:none; font-weight:500; font-size:15px; transition:border-color .15s ease, background .15s ease;}
+  .btn-secondary:hover{border-color:var(--paper); background:rgba(238,236,230,0.04);}
+  .hero-stats{display:flex; gap:36px; margin-top:46px; padding-top:24px; border-top:1px solid var(--line); flex-wrap:wrap;}
+  .hero-stat b{display:block; font-family:var(--mono); font-size:22px; color:var(--paper);}
+  .hero-stat span{font-size:12.5px; color:var(--paper-dim);}
+
+  .scene{position:relative; height:70vh; display:flex; align-items:flex-end; justify-content:center; z-index:1;}
+  .station-number{position:absolute; top:0; right:-4%; font-family:var(--display); font-weight:800; font-size:min(30vw,260px); line-height:1; color:transparent; -webkit-text-stroke:1.5px var(--line-strong); user-select:none; z-index:1;}
+  .smoke-layer{position:absolute; left:50%; bottom:36%; width:0; height:0; z-index:2;}
+  .smoke-puff-wrap{position:absolute; left:0; top:0;}
+  .smoke-puff{width:170px; height:170px; margin-left:-85px; margin-top:-85px; border-radius:50%; background:radial-gradient(circle, rgba(238,236,230,0.55), rgba(238,236,230,0) 68%); filter:blur(16px); opacity:0; will-change:transform, opacity;}
+  @keyframes sway{ 0%{transform:translateX(0);} 50%{transform:translateX(14px);} 100%{transform:translateX(0);} }
+
+  .extinguisher-wrap{position:relative; z-index:4; will-change:transform;}
+  .extinguisher-svg{width:min(46vw, 230px); height:auto; display:block;}
+
+  .hud-chip{
+    position:absolute; top:6%; left:-4%; z-index:5;
+    background:rgba(255,255,255,0.045); border:1px solid rgba(255,255,255,0.12);
+    backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+    border-radius:10px; padding:14px 18px;
+    display:flex; flex-direction:column; gap:2px;
+    opacity:0; box-shadow:0 20px 60px rgba(0,0,0,0.35);
+    animation:hudFloat 5s ease-in-out infinite;
+  }
+  @keyframes hudFloat{ 0%,100%{transform:translateY(0);} 50%{transform:translateY(-9px);} }
+  .hud-label{font-family:var(--mono); font-size:10px; color:var(--steel-light); letter-spacing:0.5px;}
+  .hud-value{font-family:var(--display); font-size:27px; color:var(--paper); font-weight:700;}
+  .hud-sub{font-family:var(--body); font-size:11px; color:var(--paper-dim);}
+
+  .scroll-cue{position:absolute; bottom:26px; left:50%; transform:translateX(-50%); font-family:var(--mono); font-size:11.5px; color:var(--paper-dim); display:flex; flex-direction:column; align-items:center; gap:6px; z-index:5;}
+  .scroll-cue .bar{width:1px; height:26px; background:var(--line-strong); position:relative; overflow:hidden;}
+  .scroll-cue .bar::after{content:""; position:absolute; top:-100%; left:0; width:100%; height:100%; background:var(--amber); animation:cue-run 1.6s ease-in-out infinite;}
+  @keyframes cue-run{ 0%{top:-100%;} 60%{top:100%;} 100%{top:100%;} }
+
+  @media (max-width:900px){
+    .stage-grid{grid-template-columns:1fr;}
+    .scene{height:40vh; margin-top:12px;}
+    .station-number{font-size:150px;}
+    .extinguisher-svg{width:150px;}
+    .hud-chip{left:0; top:-4%;}
+  }
+
+  /* ---------- DASHBOARD AO VIVO ---------- */
+  .dashboard-layout{display:grid; grid-template-columns:0.85fr 1.15fr; gap:1px; background:var(--line); border:1px solid var(--line);}
+  .dashboard-stats{display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--line);}
+  .dash-card{background:var(--ink); padding:28px 24px; transition:background .2s ease;}
+  .dash-card:hover{background:var(--ink-2);}
+  .dash-card .dc-top{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;}
+  .dash-card .dc-label{font-family:var(--mono); font-size:11px; color:var(--steel-light); letter-spacing:0.4px;}
+  .dash-card b{display:block; font-family:var(--display); font-weight:800; font-size:clamp(28px,3vw,40px); color:var(--paper); line-height:1;}
+  .dash-live{display:inline-flex; align-items:center; gap:6px; font-family:var(--mono); font-size:10px; color:var(--steel-light);}
+
+  .live-map-panel{background:var(--ink); padding:26px; position:relative; overflow:hidden;}
+  .live-map-panel .lm-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;}
+  .live-map-panel .lm-title{font-family:var(--mono); font-size:11.5px; color:var(--steel-light); letter-spacing:0.4px;}
+  .live-map{width:100%; height:auto; display:block;}
+  .lm-node{transform-origin:center;}
+  .lm-node circle.core{animation:nodePulse 2.4s ease-in-out infinite;}
+  .lm-node circle.ring{animation:nodeRing 2.4s ease-out infinite;}
+  @keyframes nodePulse{0%,100%{opacity:1;} 50%{opacity:.55;}}
+  @keyframes nodeRing{0%{r:6; opacity:.6;} 100%{r:22; opacity:0;}}
+  .lm-node.status-active circle.core{fill:var(--alarm);}
+  .lm-node.status-active circle.ring{stroke:var(--alarm);}
+  .lm-node.status-ready circle.core{fill:var(--steel-light);}
+  .lm-node.status-ready circle.ring{stroke:var(--steel-light);}
+  .lm-node.status-transit circle.core{fill:var(--amber);}
+  .lm-node.status-transit circle.ring{stroke:var(--amber);}
+  .lm-link{stroke:var(--line-strong); stroke-width:1; stroke-dasharray:4 4;}
+  .lm-legend{display:flex; gap:18px; flex-wrap:wrap; margin-top:16px; font-size:12px; color:var(--paper-dim);}
+  .lm-legend span{display:inline-flex; align-items:center; gap:7px;}
+  .lm-legend i{width:8px; height:8px; border-radius:50%; display:inline-block;}
+  @media (max-width:900px){
+    .dashboard-layout{grid-template-columns:1fr;}
+    .dashboard-stats{grid-template-columns:1fr 1fr;}
+  }
+  @media (max-width:520px){ .dashboard-stats{grid-template-columns:1fr;} }
+
+  /* ---------- TECNOLOGIAS ---------- */
+  .tech-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line); border:1px solid var(--line);}
+  .tech-card{background:var(--ink); padding:34px 28px; transition:background .2s ease;}
+  .tech-card:hover{background:var(--ink-2);}
+  .tech-card .ti{color:var(--amber); margin-bottom:18px;}
+  .tech-card .ti svg{width:28px; height:28px; display:block;}
+  .tech-card h3{font-family:var(--body); font-weight:600; font-size:18px; color:var(--paper); margin-bottom:8px;}
+  .tech-card p{font-size:14px; color:var(--paper-dim); margin:0;}
+  @media (max-width:860px){ .tech-grid{grid-template-columns:1fr 1fr;} }
+  @media (max-width:560px){ .tech-grid{grid-template-columns:1fr;} }
+
+  /* ---------- MISSÃO SUB-BLOCK (prevention) ---------- */
+  .mission-sub{margin-top:64px; padding-top:56px; border-top:1px solid var(--line);}
+  .mission-sub-head{margin-bottom:32px;}
+  .mission-sub-head h3{font-family:var(--display); font-weight:700; font-size:clamp(22px,2.6vw,30px); color:var(--paper);}
+  .mission-sub-head p{color:var(--paper-dim); font-size:14.5px; margin:8px 0 0; max-width:56ch;}
+
+  /* ---------- MAP SECTION UNITS SUB-BLOCK ---------- */
+  .map-sub{margin-top:56px; padding-top:48px; border-top:1px solid var(--line);}
+
+  /* ---------- SECTION SHELL ---------- */
+  .section{padding:96px 0; position:relative;}
+  .section.alt{background:var(--ink-2); border-top:1px solid var(--line); border-bottom:1px solid var(--line);}
+  .section-head{display:flex; justify-content:space-between; align-items:flex-end; gap:24px; margin-bottom:52px; flex-wrap:wrap;}
+  .section-head h2{font-size:clamp(28px,3.4vw,40px);}
+  .section-head p{color:var(--paper-dim); max-width:38ch; font-size:15px; margin:10px 0 0;}
+  .section-index{font-family:var(--mono); font-size:12.5px; color:var(--steel-light);}
+
+  /* ---------- REVEAL ON SCROLL ---------- */
+  .reveal{opacity:0; transform:translateY(26px); transition:opacity .7s ease, transform .7s ease;}
+  .reveal.in{opacity:1; transform:none;}
+  .reveal-stagger > *{opacity:0; transform:translateY(18px); transition:opacity .6s ease, transform .6s ease;}
+  .reveal-stagger.in > *{opacity:1; transform:none;}
+  .reveal-stagger.in > *:nth-child(1){transition-delay:.02s;}
+  .reveal-stagger.in > *:nth-child(2){transition-delay:.09s;}
+  .reveal-stagger.in > *:nth-child(3){transition-delay:.16s;}
+  .reveal-stagger.in > *:nth-child(4){transition-delay:.23s;}
+  .reveal-stagger.in > *:nth-child(5){transition-delay:.30s;}
+  .reveal-stagger.in > *:nth-child(6){transition-delay:.37s;}
+  .reveal-stagger.in > *:nth-child(7){transition-delay:.44s;}
+
+  /* ---------- SERVICES (roster list) ---------- */
+  .roster{border-top:1px solid var(--line-strong);}
+  .roster-row{display:grid; grid-template-columns:70px 46px 1fr 2fr; gap:24px; align-items:start; padding:26px 0; border-bottom:1px solid var(--line);}
+  .roster-row .rn{font-family:var(--mono); color:var(--steel-light); font-size:13px; padding-top:4px;}
+  .roster-row .ri{color:var(--amber); transition:transform .2s ease, color .2s ease;}
+  .roster-row .ri svg{width:26px; height:26px; display:block;}
+  .roster-row:hover .ri{color:var(--paper); transform:scale(1.12);}
+  .roster-row h3{font-size:21px; font-weight:600; font-family:var(--body); color:var(--paper);}
+  .roster-row .rd{color:var(--paper-dim); font-size:14.5px; max-width:52ch;}
+  @media (max-width:760px){
+    .roster-row{grid-template-columns:32px 32px 1fr; grid-template-areas:"n i t" ". . d"; row-gap:8px;}
+    .roster-row .rn{grid-area:n;} .roster-row .ri{grid-area:i;} .roster-row h3{grid-area:t;} .roster-row .rd{grid-area:d;}
+  }
+
+  /* ---------- COVERAGE MAP ---------- */
+  .coverage-layout{display:grid; grid-template-columns:1.1fr 0.9fr; gap:56px; align-items:center;}
+  .hexmap{width:100%; height:auto;}
+  .hex{opacity:0; transform:scale(.85); transform-origin:center; transition:opacity .5s ease, transform .5s ease;}
+  .hexmap.in .hex{opacity:1; transform:scale(1);}
+  .hexmap.in .hex:nth-child(1){transition-delay:.03s;}
+  .hexmap.in .hex:nth-child(2){transition-delay:.1s;}
+  .hexmap.in .hex:nth-child(3){transition-delay:.17s;}
+  .hexmap.in .hex:nth-child(4){transition-delay:.24s;}
+  .hexmap.in .hex:nth-child(5){transition-delay:.31s;}
+  .hexmap.in .hex:nth-child(6){transition-delay:.38s;}
+  .hexlabel{font-family:var(--mono); font-size:11px; fill:var(--ink);}
+  .hexname{font-family:var(--body); font-size:9.5px; fill:var(--ink);}
+  .legend{display:flex; flex-direction:column; gap:14px; margin-top:26px;}
+  .legend-item{display:flex; align-items:center; gap:10px; font-size:13.5px; color:var(--paper-dim);}
+  .legend-swatch{width:14px; height:14px; border-radius:2px;}
+  .coverage-note{font-family:var(--mono); font-size:12px; color:var(--steel-light); margin-top:18px;}
+
+  /* ---------- TIMELINE ---------- */
+  .timeline{position:relative; margin-top:16px;}
+  .timeline-line{position:absolute; top:11px; left:0; right:0; height:2px; background:var(--line-strong);}
+  .timeline-fill{height:100%; width:0%; background:var(--alarm); transition:width 1.6s cubic-bezier(.16,1,.3,1);}
+  .timeline.active .timeline-fill{width:100%;}
+  .timeline-steps{display:grid; grid-template-columns:repeat(4,1fr); gap:24px; position:relative; z-index:1;}
+  .tstep{display:flex; flex-direction:column; gap:9px;}
+  .tdot{width:24px; height:24px; border-radius:50%; background:var(--ink); border:2px solid var(--line-strong); transition:background .3s ease, border-color .3s ease;}
+  .timeline.active .tstep:nth-child(1) .tdot{border-color:var(--alarm); background:var(--alarm); transition-delay:.05s;}
+  .timeline.active .tstep:nth-child(2) .tdot{border-color:var(--alarm); background:var(--alarm); transition-delay:.5s;}
+  .timeline.active .tstep:nth-child(3) .tdot{border-color:var(--alarm); background:var(--alarm); transition-delay:1s;}
+  .timeline.active .tstep:nth-child(4) .tdot{border-color:var(--alarm); background:var(--alarm); transition-delay:1.5s;}
+  .tstep h3{font-size:17px; font-family:var(--body); font-weight:600;}
+  .tstep p{font-size:13.5px; color:var(--paper-dim); margin:0;}
+  .ttime{font-family:var(--mono); font-size:12px; color:var(--steel-light);}
+  @media (max-width:700px){ .timeline-steps{grid-template-columns:1fr 1fr; row-gap:32px;} .timeline-line{display:none;} }
+
+  /* ---------- NUMBERS ---------- */
+  .live-tag{display:inline-flex; align-items:center; gap:7px; font-family:var(--mono); font-size:11.5px; color:var(--steel-light);}
+  .live-dot{width:6px; height:6px; border-radius:50%; background:var(--alarm); animation:pulse 1.6s ease-in-out infinite;}
+  .numbers-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line); border:1px solid var(--line);}
+  .number-cell{background:var(--ink); padding:38px 26px; transition:background .2s ease;}
+  .number-cell:hover{background:var(--ink-2);}
+  .number-cell b{display:block; font-family:var(--display); font-weight:800; font-size:clamp(34px,4vw,52px); color:var(--paper); line-height:1;}
+  .number-cell span{display:block; margin-top:10px; font-size:13.5px; color:var(--paper-dim);}
+  @media (max-width:760px){.numbers-grid{grid-template-columns:repeat(2,1fr);}}
+  .count-up{font-variant-numeric:tabular-nums;}
+
+  /* ---------- PREVENTION ACCORDION ---------- */
+  .accordion{border-top:1px solid var(--line-strong);}
+  details{border-bottom:1px solid var(--line); padding:22px 0;}
+  details summary{list-style:none; cursor:pointer; display:flex; align-items:center; justify-content:space-between; font-family:var(--body); font-weight:600; font-size:17px; color:var(--paper);}
+  details summary::-webkit-details-marker{display:none;}
+  details summary .plus{font-family:var(--mono); font-size:18px; color:var(--amber); transition:transform .2s ease;}
+  details[open] summary .plus{transform:rotate(45deg);}
+  details p{color:var(--paper-dim); font-size:14.5px; max-width:64ch; margin:14px 0 0;}
+
+  /* ---------- UNITS ---------- */
+  .units-table{width:100%; border-collapse:collapse; margin-top:8px;}
+  .units-table th{text-align:left; font-family:var(--mono); font-size:11.5px; color:var(--steel-light); font-weight:400; padding:0 0 14px; border-bottom:1px solid var(--line-strong); letter-spacing:0.3px;}
+  .units-table td{padding:18px 0; border-bottom:1px solid var(--line); font-size:14.5px; color:var(--paper-dim); transition:color .15s ease;}
+  .units-table tr:hover td{color:var(--paper);}
+  .units-table td.unit-name{color:var(--paper); font-weight:500;}
+  .units-table td.mono{font-family:var(--mono); font-size:13.5px;}
+  .units-wrap{overflow-x:auto;}
+
+  /* ---------- CTA / FOOTER ---------- */
+  .cta-block{background:var(--alarm-dim); border-top:1px solid var(--line); padding:80px 0; position:relative; overflow:hidden;}
+  .cta-block .wrap{display:flex; justify-content:space-between; align-items:center; gap:40px; flex-wrap:wrap; position:relative; z-index:1;}
+  .cta-block h2{font-size:clamp(30px,4vw,46px); max-width:14ch;}
+  .cta-number{font-family:var(--display); font-weight:800; font-size:96px; line-height:1; color:var(--paper); text-decoration:none; display:inline-block; transition:transform .2s ease;}
+  .cta-number:hover{transform:translateY(-3px);}
+  .cta-number + p{font-family:var(--mono); font-size:13px; color:var(--paper-dim); margin-top:6px;}
+
+  footer{background:var(--ink-2); padding:56px 0 34px; border-top:1px solid var(--line); position:relative; z-index:2;}
+  .footer-grid{display:grid; grid-template-columns:1.4fr 1fr 1fr 1fr; gap:36px;}
+  .footer-grid h4{font-size:13px; color:var(--steel-light); font-weight:500; margin:0 0 14px; font-family:var(--mono);}
+  .footer-grid ul{list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:9px;}
+  .footer-grid a{text-decoration:none; color:var(--paper-dim); font-size:14px;}
+  .footer-grid a:hover{color:var(--paper);}
+  .footer-bottom{max-width:var(--wrap); margin:44px auto 0; padding:22px 28px 0; border-top:1px solid var(--line); display:flex; justify-content:space-between; gap:20px; flex-wrap:wrap; font-size:12.5px; color:var(--steel-light);}
+  @media (max-width:760px){.footer-grid{grid-template-columns:1fr 1fr;} .cta-block .wrap{flex-direction:column; align-items:flex-start;}}
+</style>
+</head>
+<body>
+
+<div class="particles" id="particles" aria-hidden="true"></div>
+<div class="spotlight" id="spotlight" aria-hidden="true"></div>
+
+<div class="scroll-progress" id="progressBar" aria-hidden="true"></div>
+
+<div class="ticker" aria-hidden="true">
+  <div class="ticker-track">
+    <span>TEMPO MÉDIO DE RESPOSTA: 06:42</span>
+    <span>UNIDADES EM OPERAÇÃO: 12/14</span>
+    <span>OCORRÊNCIAS HOJE: 07</span>
+    <span>QUARTÉIS ATIVOS: 07</span>
+    <span>TEMPO MÉDIO DE RESPOSTA: 06:42</span>
+    <span>UNIDADES EM OPERAÇÃO: 12/14</span>
+    <span>OCORRÊNCIAS HOJE: 07</span>
+    <span>QUARTÉIS ATIVOS: 07</span>
+  </div>
+</div>
+
+<header id="siteHeader">
+  <div class="nav-row">
+    <a href="#topo" class="brand">
+      <span class="brand-badge">CBR</span>
+      <span class="brand-text"><strong>Bombeiros Recife</strong><small>QUARTEL CENTRAL</small></span>
+    </a>
+    <nav class="main-links">
+      <a href="#missao">Missão</a>
+      <a href="#dashboard">Dashboard</a>
+      <a href="#mapa">Mapa</a>
+      <a href="#como-funciona">Como funciona</a>
+      <a href="#indicadores">Indicadores</a>
+      <a href="#tecnologias">Tecnologias</a>
+      <a href="#contato">Contato</a>
+    </nav>
+    <div class="header-right">
+      <a class="call-btn" href="tel:193"><span class="call-dot"></span>Emergência <span class="num">193</span></a>
+      <button class="menu-toggle" aria-label="Abrir menu">☰</button>
+    </div>
+  </div>
+</header>
+
+<main id="topo">
+
+  <!-- SCROLLYTELLING HERO -->
+  <section class="hero-scrolly" id="heroScrolly">
+    <div class="stage" id="stage">
+      <div class="aurora" aria-hidden="true"></div>
+      <div class="stage-grid">
+        <div class="stage-copy" id="stageCopy">
+          <span class="hero-tag">CORPO DE BOMBEIROS MILITAR — RECIFE</span>
+          <h1>
+            <span class="reveal-word"><span style="--d:.05s">Protegendo</span> <span style="--d:.12s">uma</span></span>
+            <span class="reveal-word"><span style="--d:.20s">cidade</span> <span style="--d:.28s">inteira</span></span>
+            <span class="reveal-word"><span style="--d:.36s">em</span> <span style="--d:.42s">tempo</span> <span style="--d:.48s">real.</span></span>
+          </h1>
+          <p class="lede">Monitoramento, resposta emergencial, resgate e prevenção integrados em uma única experiência digital para todos os bairros da cidade.</p>
+          <div class="hero-ctas">
+            <a class="btn-primary" href="tel:193">Ligar 193</a>
+            <a class="btn-secondary" href="#servicos">Ver serviços</a>
+          </div>
+          <div class="hero-stats">
+            <div class="hero-stat"><b class="count-up" data-target="6:42" data-format="time">0:00</b><span>tempo médio de resposta</span></div>
+            <div class="hero-stat"><b class="count-up" data-target="14">0</b><span>viaturas em operação</span></div>
+            <div class="hero-stat"><b>24h</b><span>todos os dias do ano</span></div>
+          </div>
+        </div>
+
+        <div class="scene">
+          <div class="station-number" aria-hidden="true">05</div>
+          <div class="hud-chip" id="hudChip">
+            <span class="hud-label">SISTEMA</span>
+            <strong class="hud-value">98%</strong>
+            <span class="hud-sub">pressão operacional</span>
+          </div>
+          <div class="floating-card floating-card--response" aria-hidden="true">
+            <span class="fc-label">RESPOSTA MÉDIA</span>
+            <strong class="fc-value">06:42</strong>
+          </div>
+          <div class="floating-card floating-card--fleet" aria-hidden="true">
+            <span class="fc-label">VIATURAS ATIVAS</span>
+            <strong class="fc-value">14</strong>
+          </div>
+          <div class="floating-card floating-card--ops" aria-hidden="true">
+            <span class="fc-label">OPERAÇÃO</span>
+            <strong class="fc-value">24h</strong>
+          </div>
+          <div class="smoke-layer" aria-hidden="true">
+            <div class="smoke-puff-wrap" style="left:-30px; animation:sway 7s ease-in-out infinite;"><div class="smoke-puff" data-phase="0"></div></div>
+            <div class="smoke-puff-wrap" style="left:20px; animation:sway 9s ease-in-out infinite reverse;"><div class="smoke-puff" data-phase="0.08" style="width:130px;height:130px;margin-left:-65px;margin-top:-65px;"></div></div>
+            <div class="smoke-puff-wrap" style="left:-60px; animation:sway 6s ease-in-out infinite;"><div class="smoke-puff" data-phase="0.16" style="width:200px;height:200px;margin-left:-100px;margin-top:-100px;"></div></div>
+            <div class="smoke-puff-wrap" style="left:55px; animation:sway 8s ease-in-out infinite reverse;"><div class="smoke-puff" data-phase="0.24" style="width:110px;height:110px;margin-left:-55px;margin-top:-55px;"></div></div>
+            <div class="smoke-puff-wrap" style="left:0px; animation:sway 10s ease-in-out infinite;"><div class="smoke-puff" data-phase="0.32" style="width:160px;height:160px;margin-left:-80px;margin-top:-80px;"></div></div>
+          </div>
+          <div class="extinguisher-wrap" id="extinguisherWrap">
+            <svg class="extinguisher-svg" viewBox="0 0 200 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ilustração de um extintor de incêndio">
+              <ellipse cx="100" cy="404" rx="46" ry="9" fill="#000" opacity="0.35"/>
+              <rect x="55" y="150" width="90" height="230" rx="26" fill="#1d2126" stroke="#eeece6" stroke-width="3"/>
+              <rect x="55" y="215" width="90" height="66" fill="#c1272d"/>
+              <line x1="55" y1="215" x2="145" y2="215" stroke="#eeece6" stroke-width="1.5" opacity="0.5"/>
+              <line x1="55" y1="281" x2="145" y2="281" stroke="#eeece6" stroke-width="1.5" opacity="0.5"/>
+              <rect x="80" y="100" width="40" height="52" rx="8" fill="#1d2126" stroke="#eeece6" stroke-width="3"/>
+              <line x1="65" y1="100" x2="135" y2="100" stroke="#eeece6" stroke-width="4" stroke-linecap="round"/>
+              <path d="M65 100 Q60 88 72 84" stroke="#eeece6" stroke-width="4" fill="none" stroke-linecap="round"/>
+              <circle cx="150" cy="182" r="15" fill="#1d2126" stroke="#e8a33d" stroke-width="2.4"/>
+              <line x1="150" y1="182" x2="157" y2="173" stroke="#e8a33d" stroke-width="2"/>
+              <path d="M92 152 C92 190 40 195 34 235 C30 262 40 275 40 275" stroke="#eeece6" stroke-width="4" fill="none" stroke-linecap="round"/>
+              <path d="M40 275 L24 288 L46 292 Z" fill="#eeece6"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="scroll-cue" aria-hidden="true"><span>ROLE</span><span class="bar"></span></div>
+    </div>
+  </section>
+
+  <!-- 02 · MISSÃO -->
+  <section class="section" id="missao">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div>
+          <h2>Nossa missão</h2>
+          <p>Cinco frentes de atuação, todos os dias, em todos os quartéis da cidade.</p>
+        </div>
+        <span class="section-index">02 · MISSÃO</span>
+      </div>
+      <div class="roster reveal-stagger">
+        <div class="roster-row">
+          <span class="rn">01</span>
+          <span class="ri"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2c1 3-2 4-2 7a4 4 0 0 0 8 0c0-2-1-3-1-3s1 4-2 4c-2 0-2-2-1-4 0 0-3 1-3 5a5 5 0 0 0 10 0C21 6 15 4 12 2z"/></svg></span>
+          <h3>Combate a incêndio</h3>
+          <p class="rd">Resposta a incêndios estruturais, em vegetação e em veículos, com viaturas de pronto emprego posicionadas por região.</p>
+        </div>
+        <div class="roster-row">
+          <span class="rn">02</span>
+          <span class="ri"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 15v-3a8 8 0 0 1 16 0v3"/><path d="M2 15h4v5a2 2 0 0 1-4 0z"/><path d="M18 15h4v5a2 2 0 0 1-4 0z"/></svg></span>
+          <h3>Busca e resgate</h3>
+          <p class="rd">Resgate em altura, afogamento, desabamentos e acidentes com vítimas presas em ferragens.</p>
+        </div>
+        <div class="roster-row">
+          <span class="rn">03</span>
+          <span class="ri"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6c-2.5 4.5-9.5 9-9.5 9z"/><path d="M9 12h2l1-2 1 4 1-2h2"/></svg></span>
+          <h3>Atendimento pré-hospitalar</h3>
+          <p class="rd">Primeiros socorros e suporte básico de vida no local da ocorrência, até a chegada do SAMU.</p>
+        </div>
+        <div class="roster-row">
+          <span class="rn">04</span>
+          <span class="ri"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg></span>
+          <h3>Prevenção e vistoria</h3>
+          <p class="rd">Vistorias de segurança contra incêndio em escolas, hospitais, comércios e prédios públicos.</p>
+        </div>
+        <div class="roster-row">
+          <span class="rn">05</span>
+          <span class="ri"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="2.4"/><path d="M2 20c0-3 2.5-5 6-5s6 2 6 5"/><path d="M14.5 20c0-2.3 1.7-4 4-4s3.5 1.5 3.5 4"/></svg></span>
+          <h3>Educação comunitária</h3>
+          <p class="rd">Palestras, treinamentos de brigada e simulados para escolas, condomínios e empresas.</p>
+        </div>
+      </div>
+
+      <div class="mission-sub reveal">
+        <div class="mission-sub-head">
+          <h3>Antes do alarme tocar</h3>
+          <p>Orientações simples que reduzem o risco em casa, no prédio e na rua — parte do mesmo compromisso.</p>
+        </div>
+        <div class="accordion">
+          <details open>
+            <summary>Em casa <span class="plus">+</span></summary>
+            <p>Verifique a validade do extintor, mantenha a fiação elétrica revisada e nunca sobrecarregue tomadas com múltiplos aparelhos ligados ao mesmo tempo.</p>
+          </details>
+          <details>
+            <summary>No prédio ou condomínio <span class="plus">+</span></summary>
+            <p>Mantenha as rotas de fuga desimpedidas, treine a brigada de incêndio ao menos uma vez por ano e teste os alarmes com regularidade.</p>
+          </details>
+          <details>
+            <summary>Na rua <span class="plus">+</span></summary>
+            <p>Nunca estacione sobre tampas de hidrante e mantenha a sinalização visível — isso pode significar minutos a menos numa emergência.</p>
+          </details>
+          <details>
+            <summary>Durante um alarme <span class="plus">+</span></summary>
+            <p>Saia com calma pela rota mais próxima, não use elevadores e vá direto ao ponto de encontro combinado antes de tentar voltar por pertences.</p>
+          </details>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 · DASHBOARD AO VIVO -->
+  <section class="section alt" id="dashboard">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div>
+          <h2>Dashboard ao vivo</h2>
+          <p>Um retrato do que está acontecendo agora nos quartéis da cidade.</p>
+        </div>
+        <span class="live-tag"><span class="live-dot"></span>ATUALIZADO AGORA · DADOS ILUSTRATIVOS</span>
+      </div>
+      <div class="dashboard-layout reveal">
+        <div class="dashboard-stats">
+          <div class="dash-card">
+            <div class="dc-top"><span class="dc-label">TEMPO MÉDIO</span><span class="dash-live"><span class="live-dot"></span>AO VIVO</span></div>
+            <b class="count-up" data-target="6:42" data-format="time">0:00</b>
+            <span style="font-size:12.5px; color:var(--paper-dim);">de resposta</span>
+          </div>
+          <div class="dash-card">
+            <div class="dc-top"><span class="dc-label">EM OPERAÇÃO</span><span class="dash-live"><span class="live-dot"></span>AO VIVO</span></div>
+            <b class="count-up" data-target="12">0</b>
+            <span style="font-size:12.5px; color:var(--paper-dim);">de 14 viaturas</span>
+          </div>
+          <div class="dash-card">
+            <div class="dc-top"><span class="dc-label">OCORRÊNCIAS HOJE</span><span class="dash-live"><span class="live-dot"></span>AO VIVO</span></div>
+            <b class="count-up" data-target="7">0</b>
+            <span style="font-size:12.5px; color:var(--paper-dim);">registradas até agora</span>
+          </div>
+          <div class="dash-card">
+            <div class="dc-top"><span class="dc-label">QUARTÉIS ATIVOS</span><span class="dash-live"><span class="live-dot"></span>AO VIVO</span></div>
+            <b class="count-up" data-target="7">0</b>
+            <span style="font-size:12.5px; color:var(--paper-dim);">cobrindo a cidade</span>
+          </div>
+        </div>
+        <div class="live-map-panel">
+          <div class="lm-head">
+            <span class="lm-title">POSIÇÃO DAS VIATURAS</span>
+            <span class="live-tag"><span class="live-dot"></span>TEMPO REAL</span>
+          </div>
+          <svg class="live-map" viewBox="0 0 420 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mapa esquemático mostrando a posição em tempo real das viaturas na cidade">
+            <line class="lm-link" x1="90" y1="70" x2="200" y2="120"/>
+            <line class="lm-link" x1="200" y1="120" x2="320" y2="60"/>
+            <line class="lm-link" x1="200" y1="120" x2="150" y2="200"/>
+            <line class="lm-link" x1="200" y1="120" x2="300" y2="190"/>
+            <line class="lm-link" x1="150" y1="200" x2="70" y2="210"/>
+            <line class="lm-link" x1="300" y1="190" x2="360" y2="140"/>
+            <g class="lm-node status-ready"><circle class="ring" cx="90" cy="70" r="6" fill="none" stroke-width="1.5"/><circle class="core" cx="90" cy="70" r="5"/></g>
+            <g class="lm-node status-active"><circle class="ring" cx="200" cy="120" r="6" fill="none" stroke-width="1.5"/><circle class="core" cx="200" cy="120" r="6"/></g>
+            <g class="lm-node status-transit"><circle class="ring" cx="320" cy="60" r="6" fill="none" stroke-width="1.5"/><circle class="core" cx="320" cy="60" r="5"/></g>
+            <g class="lm-node status-ready"><circle class="ring" cx="150" cy="200" r="6" fill="none" stroke-width="1.5"/><circle class="core" cx="150" cy="200" r="5"/></g>
+            <g class="lm-node status-active"><circle class="ring" cx="300" cy="190" r="6" fill="none" stroke-width="1.5"/><circle class="core" cx="300" cy="190" r="6"/></g>
+            <g class="lm-node status-ready"><circle class="ring" cx="70" cy="210" r="6" fill="none" stroke-width="1.5"/><circle class="core" cx="70" cy="210" r="5"/></g>
+            <g class="lm-node status-transit"><circle class="ring" cx="360" cy="140" r="6" fill="none" stroke-width="1.5"/><circle class="core" cx="360" cy="140" r="5"/></g>
+          </svg>
+          <div class="lm-legend">
+            <span><i style="background:var(--alarm)"></i> em ocorrência</span>
+            <span><i style="background:var(--amber)"></i> em deslocamento</span>
+            <span><i style="background:var(--steel-light)"></i> disponível no quartel</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 · MAPA EM TEMPO REAL -->
+  <section class="section" id="mapa">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div>
+          <h2>Mapa em tempo real</h2>
+          <p>Tempo médio de chegada da primeira viatura, por região da cidade.</p>
+        </div>
+        <span class="section-index">MAPA · 06 ZONAS</span>
+      </div>
+      <div class="coverage-layout">
+        <svg class="hexmap" viewBox="0 0 420 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mapa esquemático hexagonal com o tempo de resposta médio de seis regiões da cidade">
+          <g class="hex"><polygon points="140,20 200,55 200,125 140,160 80,125 80,55" fill="#8a95a1"/><text x="140" y="82" text-anchor="middle" class="hexlabel">04:10</text><text x="140" y="98" text-anchor="middle" class="hexname">Centro</text></g>
+          <g class="hex"><polygon points="260,20 320,55 320,125 260,160 200,125 200,55" fill="#e8a33d"/><text x="260" y="82" text-anchor="middle" class="hexlabel">06:30</text><text x="260" y="98" text-anchor="middle" class="hexname">Zona Norte</text></g>
+          <g class="hex"><polygon points="80,125 140,160 140,230 80,265 20,230 20,160" fill="#8a95a1"/><text x="80" y="192" text-anchor="middle" class="hexlabel">05:05</text><text x="80" y="208" text-anchor="middle" class="hexname">Orla</text></g>
+          <g class="hex"><polygon points="200,125 260,160 260,230 200,265 140,230 140,160" fill="#e8a33d"/><text x="200" y="192" text-anchor="middle" class="hexlabel">05:45</text><text x="200" y="208" text-anchor="middle" class="hexname">Zona Sul</text></g>
+          <g class="hex"><polygon points="320,125 380,160 380,230 320,265 260,230 260,160" fill="#c1272d"/><text x="320" y="192" text-anchor="middle" class="hexlabel">07:20</text><text x="320" y="208" text-anchor="middle" class="hexname">Zona Oeste</text></g>
+          <g class="hex"><polygon points="140,140 200,175 200,245 140,280 80,245 80,175" fill="#c1272d"/><text x="140" y="207" text-anchor="middle" class="hexlabel">08:40</text><text x="140" y="223" text-anchor="middle" class="hexname">Área Insular</text></g>
+        </svg>
+        <div class="reveal">
+          <div class="legend">
+            <div class="legend-item"><span class="legend-swatch" style="background:#8a95a1"></span> até 5 min — cobertura direta</div>
+            <div class="legend-item"><span class="legend-swatch" style="background:#e8a33d"></span> 5–7 min — cobertura regular</div>
+            <div class="legend-item"><span class="legend-swatch" style="background:#c1272d"></span> acima de 7 min — em expansão</div>
+          </div>
+          <p class="coverage-note">* dados ilustrativos para fins de demonstração deste protótipo.</p>
+        </div>
+      </div>
+
+      <div class="map-sub reveal">
+        <div class="section-head" style="margin-bottom:24px;">
+          <div>
+            <h3 style="font-family:var(--display); font-weight:700; font-size:clamp(20px,2.4vw,26px);">Quartéis da cidade</h3>
+            <p style="color:var(--paper-dim); font-size:14px; margin:6px 0 0;">Sete unidades distribuídas para cobrir cada região com agilidade.</p>
+          </div>
+        </div>
+        <div class="units-wrap">
+          <table class="units-table">
+            <thead><tr><th>Unidade</th><th>Região</th><th>Endereço</th><th>Telefone</th></tr></thead>
+            <tbody>
+              <tr><td class="unit-name">1º Grupamento</td><td>Centro</td><td>Rua das Flores, 120</td><td class="mono">(81) 3211-0001</td></tr>
+              <tr><td class="unit-name">2º Grupamento</td><td>Boa Viagem</td><td>Av. Boa Viagem, 3400</td><td class="mono">(81) 3211-0002</td></tr>
+              <tr><td class="unit-name">3º Grupamento</td><td>Zona Norte</td><td>Av. Norte, 880</td><td class="mono">(81) 3211-0003</td></tr>
+              <tr><td class="unit-name">4º Grupamento</td><td>Zona Oeste</td><td>Estrada Velha, 210</td><td class="mono">(81) 3211-0004</td></tr>
+              <tr><td class="unit-name">5º Grupamento</td><td>Orla</td><td>Av. da Praia, 60</td><td class="mono">(81) 3211-0005</td></tr>
+              <tr><td class="unit-name">6º Grupamento</td><td>Área Insular</td><td>Rua do Cais, 45</td><td class="mono">(81) 3211-0006</td></tr>
+              <tr><td class="unit-name">7º Grupamento</td><td>Zona Sul</td><td>Av. Sul, 500</td><td class="mono">(81) 3211-0007</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 · COMO FUNCIONA -->
+  <section class="section alt" id="como-funciona">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div>
+          <h2>Como funciona</h2>
+          <p>O caminho de uma ocorrência real, do primeiro toque até a viatura no local.</p>
+        </div>
+        <span class="section-index">04 ETAPAS</span>
+      </div>
+      <div class="timeline" id="timelineRow">
+        <div class="timeline-line"><div class="timeline-fill"></div></div>
+        <div class="timeline-steps reveal-stagger">
+          <div class="tstep"><span class="tdot"></span><h3>Chamado</h3><p>O 193 recebe a ligação e localiza a ocorrência.</p><span class="ttime">00:00</span></div>
+          <div class="tstep"><span class="tdot"></span><h3>Despacho</h3><p>A central aciona o quartel mais próximo da região.</p><span class="ttime">00:18</span></div>
+          <div class="tstep"><span class="tdot"></span><h3>Saída</h3><p>A viatura sai com a equipe já a caminho do endereço.</p><span class="ttime">01:05</span></div>
+          <div class="tstep"><span class="tdot"></span><h3>Chegada</h3><p>Primeira equipe no local, pronta para agir.</p><span class="ttime">06:42</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 06 · INDICADORES -->
+  <section class="section" id="indicadores">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div>
+          <h2>Indicadores do ano</h2>
+          <p>Um retrato rápido do que passa pelos quartéis da cidade.</p>
+        </div>
+        <span class="live-tag"><span class="live-dot"></span>DADOS ILUSTRATIVOS</span>
+      </div>
+      <div class="numbers-grid reveal-stagger">
+        <div class="number-cell"><b>06:42</b><span>tempo médio de resposta</span></div>
+        <div class="number-cell"><b>3.482</b><span>ocorrências atendidas no ano</span></div>
+        <div class="number-cell"><b>128</b><span>pessoas resgatadas</span></div>
+        <div class="number-cell"><b>07</b><span>quartéis em operação</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 07 · TECNOLOGIAS -->
+  <section class="section alt" id="tecnologias">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div>
+          <h2>Tecnologias por trás da operação</h2>
+          <p>A infraestrutura digital que conecta central, quartéis e viaturas em tempo real.</p>
+        </div>
+        <span class="section-index">07 · TECNOLOGIAS</span>
+      </div>
+      <div class="tech-grid reveal-stagger">
+        <div class="tech-card">
+          <span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg></span>
+          <h3>Central de despacho</h3>
+          <p>Sistema de atendimento e despacho que localiza a ocorrência e aciona o quartel mais próximo em segundos.</p>
+        </div>
+        <div class="tech-card">
+          <span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg></span>
+          <h3>Telemetria de viaturas</h3>
+          <p>Rastreamento por GPS e sensores embarcados mostram posição, status e tempo estimado de cada viatura.</p>
+        </div>
+        <div class="tech-card">
+          <span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg></span>
+          <h3>Rede de sensores</h3>
+          <p>Alarmes e sensores de fumaça conectados em prédios públicos alimentam o sistema com alertas antecipados.</p>
+        </div>
+        <div class="tech-card">
+          <span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M9 18h6"/></svg></span>
+          <h3>App de campo</h3>
+          <p>Equipes em campo recebem dados da ocorrência, rota otimizada e histórico do endereço direto no celular.</p>
+        </div>
+        <div class="tech-card">
+          <span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3v18h18"/><path d="M7 15l4-6 4 4 5-8"/></svg></span>
+          <h3>Painel de comando</h3>
+          <p>Analytics em tempo real cruzam dados históricos e ao vivo para orientar o posicionamento das viaturas.</p>
+        </div>
+        <div class="tech-card">
+          <span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6c-2.5 4.5-9.5 9-9.5 9z"/></svg></span>
+          <h3>Integração com o SAMU</h3>
+          <p>Troca de dados entre centrais garante que o suporte médico chegue alinhado ao atendimento dos bombeiros.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-block" id="contato">
+    <div class="wrap reveal">
+      <h2>Uma emergência não espera. Nem a gente.</h2>
+      <div>
+        <a class="cta-number" href="tel:193">193</a>
+        <p>ligação gratuita, 24 horas por dia</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap footer-grid">
+    <div>
+      <h4>CORPO DE BOMBEIROS · RECIFE</h4>
+      <p style="color:var(--paper-dim); font-size:14px; max-width:32ch;">Combate a incêndio, resgate e prevenção para todos os bairros da cidade, todos os dias do ano.</p>
+    </div>
+    <div>
+      <h4>NAVEGAÇÃO</h4>
+      <ul><li><a href="#servicos">Serviços</a></li><li><a href="#cobertura">Cobertura</a></li><li><a href="#numeros">Números</a></li><li><a href="#unidades">Unidades</a></li></ul>
+    </div>
+    <div>
+      <h4>CONTATO</h4>
+      <ul><li><a href="tel:193">193 — Emergência</a></li><li><a href="#">Ouvidoria</a></li><li><a href="#">Imprensa</a></li></ul>
+    </div>
+    <div>
+      <h4>REDES</h4>
+      <ul><li><a href="#">Instagram</a></li><li><a href="#">X (Twitter)</a></li></ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>Protótipo de redesign modulado por Ellen Beatryz M S Lago — não é um canal oficial do Corpo de Bombeiros. Em emergência real, disque 193.</span>
+    <span>Protótipo · 2026</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduced) document.body.classList.add('reduced-motion');
+
+  const progressBar = document.getElementById('progressBar');
+  const header = document.getElementById('siteHeader');
+  const heroScrolly = document.getElementById('heroScrolly');
+  const extinguisher = document.getElementById('extinguisherWrap');
+  const stageCopy = document.getElementById('stageCopy');
+  const hudChip = document.getElementById('hudChip');
+  const floatingCards = document.querySelectorAll('.floating-card');
+  const smokePuffs = document.querySelectorAll('.smoke-puff');
+  const stage = document.getElementById('stage');
+
+  function clamp(v, min, max){ return Math.min(max, Math.max(min, v)); }
+
+  function updateScrolly(){
+    const rect = heroScrolly.getBoundingClientRect();
+    const total = heroScrolly.offsetHeight - window.innerHeight;
+    let progress = total > 0 ? -rect.top / total : 0;
+    progress = clamp(progress, 0, 1);
+
+    if (reduced) {
+      extinguisher.style.transform = 'translateY(-40px) scale(1.05)';
+      smokePuffs.forEach(p => { p.style.opacity = 0.3; });
+      hudChip.style.opacity = 1;
+      floatingCards.forEach(c => { c.style.opacity = 1; });
+      stageCopy.style.opacity = 1;
+      return;
+    }
+
+    const y = 60 - progress * 220;
+    const scale = 0.85 + progress * 0.35;
+    extinguisher.style.transform = `translateY(${y}px) scale(${scale})`;
+
+    smokePuffs.forEach((p) => {
+      const phase = parseFloat(p.dataset.phase || 0);
+      const local = clamp((progress - phase) * 1.5, 0, 1);
+      p.style.opacity = local * 0.7;
+      p.style.transform = `translateY(${-local * 180}px) scale(${0.6 + local * 0.9})`;
+    });
+
+    const hudOpacity = clamp((progress - 0.28) * 3, 0, 1);
+    hudChip.style.opacity = hudOpacity;
+    floatingCards.forEach(c => { c.style.opacity = hudOpacity; });
+
+    const copyOpacity = progress < 0.45 ? 1 : clamp(1 - (progress - 0.45) * 2.2, 0, 1);
+    stageCopy.style.opacity = copyOpacity;
+    stageCopy.style.transform = `translateY(${(1 - copyOpacity) * -16}px)`;
+  }
+
+  function updateHeader(){ header.classList.toggle('compact', window.scrollY > 40); }
+
+  function updateProgressBar(){
+    const h = document.documentElement;
+    const scrolled = h.scrollTop / (h.scrollHeight - h.clientHeight || 1);
+    progressBar.style.transform = `scaleX(${scrolled})`;
+  }
+
+  let ticking = false;
+  function onScroll(){ updateScrolly(); updateHeader(); updateProgressBar(); ticking = false; }
+  window.addEventListener('scroll', () => { if (!ticking) { requestAnimationFrame(onScroll); ticking = true; } }, { passive:true });
+  onScroll();
+
+  // cursor glow, hero only, pointer devices without reduced motion
+  if (!reduced && window.matchMedia('(pointer:fine)').matches) {
+    stage.classList.add('has-pointer');
+    stage.addEventListener('mousemove', (e) => {
+      const r = stage.getBoundingClientRect();
+      stage.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+      stage.style.setProperty('--my', (e.clientY - r.top) + 'px');
+    });
+  }
+
+  // global cursor spotlight, whole page, pointer devices without reduced motion
+  const spotlight = document.getElementById('spotlight');
+  if (!reduced && window.matchMedia('(pointer:fine)').matches) {
+    document.addEventListener('mousemove', (e) => {
+      spotlight.style.setProperty('--sx', e.clientX + 'px');
+      spotlight.style.setProperty('--sy', e.clientY + 'px');
+      spotlight.classList.add('active');
+    });
+    document.addEventListener('mouseleave', () => spotlight.classList.remove('active'));
+  }
+
+  // ambient light particles drifting up the page
+  const particleField = document.getElementById('particles');
+  if (particleField) {
+    const count = reduced ? 0 : (window.innerWidth < 700 ? 8 : 16);
+    for (let i = 0; i < count; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      const size = 2 + Math.random() * 4;
+      p.style.width = size + 'px';
+      p.style.height = size + 'px';
+      p.style.left = Math.random() * 100 + '%';
+      p.style.setProperty('--drift', (Math.random() * 60 - 30) + 'px');
+      p.style.animationDuration = (14 + Math.random() * 12) + 's';
+      p.style.animationDelay = (Math.random() * 20) + 's';
+      particleField.appendChild(p);
+    }
+  }
+
+  // number count-up when in view
+  const counters = document.querySelectorAll('.count-up');
+  function animateCount(el){
+    const target = el.dataset.target;
+    const isTime = el.dataset.format === 'time';
+    if (reduced) { el.textContent = target; return; }
+    const totalMs = 900;
+    const start = performance.now();
+    if (isTime) {
+      const [m, s] = target.split(':').map(Number);
+      const step = (now) => {
+        const p = clamp((now - start) / totalMs, 0, 1);
+        el.textContent = Math.floor(m*p) + ':' + String(Math.floor(s*p)).padStart(2,'0');
+        if (p < 1) requestAnimationFrame(step); else el.textContent = target;
+      };
+      requestAnimationFrame(step);
+    } else {
+      const num = parseInt(target, 10);
+      const step = (now) => {
+        const p = clamp((now - start) / totalMs, 0, 1);
+        el.textContent = Math.floor(num*p);
+        if (p < 1) requestAnimationFrame(step); else el.textContent = num;
+      };
+      requestAnimationFrame(step);
+    }
+  }
+  const countIO = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { animateCount(e.target); countIO.unobserve(e.target); } });
+  }, { threshold:0.5 });
+  counters.forEach(c => countIO.observe(c));
+
+  // generic reveal-on-scroll (single trigger per element)
+  const revealEls = document.querySelectorAll('.reveal, .reveal-stagger');
+  const revealIO = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); revealIO.unobserve(e.target); } });
+  }, { threshold:0.15 });
+  revealEls.forEach(el => revealIO.observe(el));
+
+  // hex map stagger reveal
+  const hexmap = document.querySelector('.hexmap');
+  const hexIO = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); hexIO.unobserve(e.target); } });
+  }, { threshold:0.2 });
+  if (hexmap) hexIO.observe(hexmap);
+
+  // timeline draw-in
+  const timelineRow = document.getElementById('timelineRow');
+  const timelineIO = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('active'); timelineIO.unobserve(e.target); } });
+  }, { threshold:0.35 });
+  if (timelineRow) timelineIO.observe(timelineRow);
+})();
+</script>
+
+</body>
+</html>
